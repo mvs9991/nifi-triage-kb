@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "nifikb": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "nifikb", "mcp"]
+    }
+  }
+}

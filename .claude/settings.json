@@ -1,0 +1,18 @@
+{
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "mcp__nifikb",
+      "Bash(python -m nifikb:*)",
+      "Bash(py -m nifikb:*)",
+      "Read(kb/**)",
+      "Read(knowledge/**)"
+    ],
+    "deny": [
+      "Read(**/flow.json.gz)",
+      "Read(**/flow.xml.gz)",
+      "Read(**/*.nar)",
+      "Read(kb/kb.sqlite)"
+    ]
+  }
+}

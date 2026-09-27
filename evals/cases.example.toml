@@ -1,0 +1,23 @@
+# Evaluation set: real past tickets with their known root cause (anonymise as needed).
+# Copy to evals/cases.toml and add 15-30 tickets covering your common problem types.
+#   python -m nifikb eval                         -> do the tools rank the true cause in the top 3?
+#   python -m nifikb eval --agent "gemini -p"     -> does the model's answer name it? (prompt goes to stdin)
+#   python -m nifikb eval --save evals/last.json  -> keep results to compare after changes
+# Sample files can live in evals/samples/ (paths are relative to this file).
+
+[[case]]
+id = "INC-0001-example"
+ticket = "SALES file of 26 Sep did not load, customer names are missing in the report"
+file = "SALES_20260926.csv"
+headers = ["ORDER_NO", "CUSTNAME", "AMOUNT", "ORDER_DT", "REGION"]
+expect_any = ["CUSTNAME"]            # the true cause: the header CUSTNAME does not match structure field CUST_NAME
+top = 3
+answer_expect = ["CUST_NAME"]        # the model's answer must mention the structure field
+
+# [[case]]
+# id = "INC-0002"
+# ticket = "orders API load failed at 02:14 with 'Column count mismatch'"
+# file = "orders_20260926.json"
+# error = "Column count mismatch"
+# sample = "samples/orders_20260926.json"
+# expect_any = ["delimited by", "column count"]

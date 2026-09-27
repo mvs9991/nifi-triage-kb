@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+
+# Generated on each machine by `python -m nifikb build` (contains flow configuration; rebuild instead of committing)
+kb/
+ops/build.log
+
+# Keep: knowledge/ (team context + learnings), nifikb.toml (no secrets - passwords come from environment variables)
+dist/
+ops/last-report.html

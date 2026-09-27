@@ -1,0 +1,39 @@
+# Proposal for a NEW feed - check it before anyone inserts the rows:
+#   python -m nifikb onboard examples/new-feed.example.toml [--live]
+# Column names are the config tables' own (kb/metadata.md lists them). Nothing is written anywhere: the check lists problems
+# and prints INSERT statements for a human to review and run. Leave secrets (passwords, tokens) out - the DBA sets them.
+
+example_file = "INVOICE_20260927.csv"     # a real file name the definition must match (checked against every definition)
+# sample = "INVOICE_20260927.csv"         # optional: a sample file (relative to this file) - header and content are checked
+like = "SALES_YYYYMMDD.csv"               # optional: an existing, similar feed - columns / rows it has and this one lacks
+# structure_csv = "invoice_columns.csv"   # optional: the structure rows as CSV (header = column names), instead of [[structure]]
+
+[definition]                              # one OBJ_DEFINITION row
+# OBJ_ID = 123                            # leave out when the database generates it
+FILE_NAME = "INVOICE_YYYYMMDD.csv"
+TABLE_NAME = "stg_invoice"
+SOURCE_SYSTEM = "ERP"
+DELIMITER = ","
+ACTIVE_FLAG = "Y"
+
+[[structure]]                             # one OBJ_STRUCTURE row per column, in file order (the parent id is filled in)
+COL_NAME = "INVOICE_NO"
+DATA_TYPE = "INTEGER"
+COL_SEQ = 1
+MANDATORY_FLAG = "Y"
+
+[[structure]]
+COL_NAME = "CUSTOMER_NAME"
+DATA_TYPE = "VARCHAR"
+COL_SEQ = 2
+COL_LENGTH = 100
+
+[[structure]]
+COL_NAME = "AMOUNT"
+DATA_TYPE = "DECIMAL"
+COL_SEQ = 3
+
+[[rows.SOURCE_FEED_CONFIG]]               # rows of other config tables that belong to the feed (the link column is filled in)
+FEED_NAME = "erp_invoice_feed"
+SFTP_HOST = "sftp.erp.example.com"
+REMOTE_DIR = "/outbound/invoice"

@@ -1,0 +1,15 @@
+description = "Save a reusable lesson from this conversation as a team learning shared with Claude and people"
+prompt = """
+Record a team learning following the "Team learnings" rules in GEMINI.md.
+
+What to capture: {{args}}
+(If empty, use the root cause and fix established in this conversation.)
+
+1. find_learnings with the file names / tables / feeds / processors involved; if an existing learning covers it, retire it
+   (retire_learning with replaced_by) and add the corrected one - never create a near duplicate.
+2. Only save knowledge the KB cannot derive (not what the flow / code / tables already show), verified in this
+   conversation, without secrets or personal data.
+3. add_learning: specific title, kind, applies_to (file patterns, tables, feeds, processor names / short ids, config
+   rows), tags, ticket if known, author "gemini", body with ## Symptom, ## Cause, ## Fix, ## How to spot it next time.
+4. Show the saved id and the text. If the lesson keeps recurring, suggest what to add to knowledge/context.md.
+"""

@@ -1,0 +1,6 @@
+<project>
+  <parent><groupId>com.acme</groupId><artifactId>acme-parent</artifactId><version>1.0</version></parent>
+  <artifactId>nifi-acme-processors</artifactId>
+  <packaging>jar</packaging>
+  <dependencies><dependency><artifactId>nifi-api</artifactId></dependency></dependencies>
+</project>

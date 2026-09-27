@@ -1,0 +1,97 @@
+# =====================================================================================================================
+# nifikb configuration - the ONLY file you edit.   (THIS COPY: the personal sandbox on D:\Sanjay)
+#   * Paths may be absolute or relative to this file; ${VARS} are expanded.
+#   * No secrets in here: passwords come from an environment variable (password_env) or a protected file
+#     (password_file, chmod 600 on Linux).
+#   * After editing:  python -m nifikb build   then   python -m nifikb doctor
+# =====================================================================================================================
+
+db_refresh_hours = 24                    # how often table schemas are re-read (build --refresh-db forces it)
+
+# ---- 1. NiFi -------------------------------------------------------------------------------------------------------
+[nifi]
+home = "D:/Sanjay/nifi-1.27.0"                 # NiFi install folder: conf/flow.json.gz, lib/*.nar and logs/ are read from here
+# flow_file = "copies/flow.json.gz"      # or a copied flow file, when NiFi runs on another machine
+extra_nar_dirs = []                      # folders with custom NARs that are not in <home>/lib
+
+[logs]                                   # nifi-app*.log / nifi-bootstrap*.log - read incrementally, only warnings / errors kept
+# dirs = ["/opt/nifi/logs"]              # default: <home>/logs
+keep_days = 14                           # keep this many days of events (counted back from the newest one)
+# initial_tail_mb = 200                  # first run on a huge log: only read its last N MB
+
+# [nifi_api]                             # optional, read-only: provenance ("where was my file dropped, why") + live bulletins
+# url = "https://nifi-host:8443/nifi-api"
+# username = "readonly_user"             # needs the NiFi policies "query provenance" + "view provenance"
+# password_env = "NIFIKB_NIFI_PASSWORD"  # or: password_file = "~/.nifikb/nifi.pw"
+# ca_cert = "/etc/pki/nifi-ca.pem"       # CA of NiFi's certificate;  verify_ssl = false only for a quick test
+# client_cert = "me.pem"                 # instead of username / password when NiFi uses client certificates
+# client_key = "me.key"
+# token_env = "NIFIKB_NIFI_TOKEN"        # or a pre-issued bearer token (Kerberos / OIDC setups)
+
+# ---- 2. Code -------------------------------------------------------------------------------------------------------
+[code]
+repos = ["D:/Sanjay/nifi-1.27.0/scripts"]  # Bitbucket clones: custom NAR projects (Maven / Java), scripts, Spark job scripts
+
+# ---- 3. Databases (read-only users only) ---------------------------------------------------------------------------
+# One block per database. The flow's DBCP connection pools are matched by host + port + database of their JDBC URL.
+# [[databases]]
+# name = "metadata"
+# kind = "mariadb"                       # mariadb | mysql | postgres | sqlite
+# host = "db-host"
+# port = 3306
+# database = "nifi_meta"
+# user = "readonly_user"
+# password_env = "NIFIKB_DB_PASSWORD"    # or: password_file = "~/.nifikb/db.pw"
+# include_tables = []                    # also document these tables (SQL LIKE / glob patterns, e.g. "file_%")
+# profile_tables = []                    # list distinct values of low-cardinality text columns (status, source, ...)
+# sample_rows = 0                        # >0 adds a few masked sample rows per table
+
+# Sandbox: local MariaDB (C:\Program Files\MariaDB 13.0, started by hand) with demo OBJ_* tables in testDB.
+[[databases]]
+name = "testdb"
+kind = "mariadb"
+host = "localhost"
+port = 3306
+database = "testDB"
+user = "nifikb"
+password_env = "NIFIKB_DB_PASSWORD"
+all_tables = true
+
+# ---- 4. Metadata config tables (OBJ_DEFINITION, OBJ_STRUCTURE, feed / API / server config, ...) --------------------
+# Enables `diagnose` / `investigate` by file / feed / table, a masked snapshot of the config rows, their change history,
+# and definition checks. Roles and relations are auto-detected: kb/metadata.md shows what was detected - override only
+# what is wrong.
+# [metadata]
+# db = "metadata"                        # the [[databases]] name that holds the config tables
+# target_db = "none"                     # loads go to HDFS / S3 files: no target-table checks. Or the [[databases]] name
+#                                        #   holding the load tables, to check definitions against them.
+# tables = ["OBJ_%", "%_CONFIG", "%_CONFIG_%", "%_DEFINITION", "%_STRUCTURE", "%_METADATA%"]   # which tables are config
+# refresh_hours = 1                      # re-read the config rows (and record row changes) at most this often
+# snapshot_max_rows = 20000              # rows per config table kept (masked); structure table: structure_max_rows
+# --- overrides, only if kb/metadata.md shows a wrong guess:
+# definition_table = "OBJ_DEFINITION"    # one row per file / object
+# definition_id = "OBJ_ID"
+# definition_keys = ["FILE_NAME", "TABLE_NAME"]   # what file / table names are matched against (patterns *, %, YYYYMMDD, regex)
+# definition_target = "TABLE_NAME"       # the table a file is loaded into
+# definition_location = "HDFS_PATH"      # the HDFS / S3 location it is written to
+# structure_table = "OBJ_STRUCTURE"      # one row per column of a definition
+# structure_parent = "OBJ_ID"
+# structure_field = "COL_NAME"
+# structure_type = "DATA_TYPE"
+# structure_order = "COL_SEQ"
+# structure_length = "COL_LENGTH"
+# structure_nullable = "NULLABLE_FLAG"   # a column named like MANDATORY / REQUIRED / NOT_NULL is read as "required"
+# structure_path = "JSON_PATH"           # JSON path per column for API / JSON feeds ($.data[*].customer.name)
+# [[metadata.relations]]                 # joins that are not declared as foreign keys
+# child = "SOURCE_FEED_CONFIG.OBJ_ID"
+# parent = "OBJ_DEFINITION.OBJ_ID"
+
+[metadata]
+db = "testdb"                            # sandbox demo tables; loads here go to a table in the same DB (target_db defaults to db)
+
+# ---- 5. Where things are written -----------------------------------------------------------------------------------
+[output]
+dir = "kb"                               # generated knowledge base (markdown + kb.sqlite) - rebuilt, never edited by hand
+
+[knowledge]
+dir = "knowledge"                        # team context + learnings written by people and agents - kept, commit it to git

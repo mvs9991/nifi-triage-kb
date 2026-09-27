@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "nifikb": {
+      "command": "python",
+      "args": ["-m", "nifikb", "mcp"],
+      "cwd": ".",
+      "timeout": 600000
+    }
+  }
+}
